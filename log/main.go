@@ -58,7 +58,7 @@ func Info(msg string) {
 	if err != nil {
 		color.Red(err.Error())
 	}
-	fmt.Printf("%s %s", blue("[ INFO ]: ->"), msg)
+	fmt.Printf("%s %s \n", blue("[ INFO ]: ->"), msg)
 }
 
 func Warning(msg string) {
@@ -66,5 +66,5 @@ func Warning(msg string) {
 	if err != nil {
 		color.Red(err.Error())
 	}
-	fmt.Printf("%s %s", yellow("[ WARN ]: ->"), msg)
+	fmt.Printf("%s %s \n", yellow("[ WARN ]: ->"), msg)
 }
