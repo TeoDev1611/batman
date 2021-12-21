@@ -16,12 +16,28 @@ type logData struct {
 	TimeStamp string
 }
 
+type customLogMessage struct {
+	Warning string
+	Info    string
+	Error   string
+	Fatal   string
+}
+
+var CustomLog = customLogMessage{}
+
 var (
 	yellow = color.New(color.FgYellow, color.Underline).SprintFunc()
 	red    = color.New(color.FgRed, color.Bold).SprintFunc()
 	blue   = color.New(color.FgBlue).SprintFunc()
 	pink   = color.New(color.FgHiMagenta, color.Bold).SprintFunc()
 )
+
+func init() {
+	CustomLog.Error = "ERROR"
+	CustomLog.Info = "INFO"
+	CustomLog.Warning = "WARN"
+	CustomLog.Fatal = "FATAL"
+}
 
 func writeLog(typelog, msg string) error {
 	if Config.FileToLog == "default" {
@@ -54,7 +70,7 @@ func writeLog(typelog, msg string) error {
 }
 
 func Info(msg string) {
-	err := writeLog("INFO", msg)
+	err := writeLog(CustomLog.Info, msg)
 	if err != nil {
 		color.Red(err.Error())
 	}
@@ -62,7 +78,7 @@ func Info(msg string) {
 }
 
 func Warning(msg string) {
-	err := writeLog("WARN", msg)
+	err := writeLog(CustomLog.Warning, msg)
 	if err != nil {
 		color.Red(err.Error())
 	}
