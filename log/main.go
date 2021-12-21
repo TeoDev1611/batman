@@ -116,7 +116,7 @@ func Error(msg string) {
 
 // Make a log to the terminal and the file with Fatal level
 func Fatal(msg string) {
-	err := writeLog(LogOpts.Error, msg)
+	err := writeLog(LogOpts.Fatal, msg)
 	if err != nil {
 		color.Red(err.Error())
 		return
