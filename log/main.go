@@ -17,12 +17,17 @@ type logData struct {
 }
 
 type customLogMessage struct {
+	// Custom log key to the file warning level: DEFAULT: WARN
 	Warning string
-	Info    string
-	Error   string
-	Fatal   string
+	// Custom log key to the file info level DEFAULT: INFO
+	Info string
+	// Custom log key to the file error level DEFAULT: ERROR
+	Error string
+	// Custom log key to the file fatal level DEFAULT: FATAL
+	Fatal string
 }
 
+// The customlog helper for the customLogMessage struct
 var CustomLog = customLogMessage{}
 
 var (
@@ -32,6 +37,7 @@ var (
 	pink   = color.New(color.FgHiMagenta, color.Bold).SprintFunc()
 )
 
+// Init the struct values
 func init() {
 	CustomLog.Error = "ERROR"
 	CustomLog.Info = "INFO"
@@ -69,6 +75,7 @@ func writeLog(typelog, msg string) error {
 	return nil
 }
 
+// Make a log to the terminal and the file with Info level
 func Info(msg string) {
 	err := writeLog(CustomLog.Info, msg)
 	if err != nil {
@@ -77,6 +84,7 @@ func Info(msg string) {
 	fmt.Printf("%s %s \n", blue("[ INFO ]: ->"), msg)
 }
 
+// Make a log to the terminal and the file with Warning level
 func Warning(msg string) {
 	err := writeLog(CustomLog.Warning, msg)
 	if err != nil {
