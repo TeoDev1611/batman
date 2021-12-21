@@ -39,7 +39,8 @@ func writeLog(typelog, msg string) error {
 		return errors.New("Error in parse from struct to json report github")
 	}
 
-	file, err2 := os.OpenFile(Config.FileToLog, os.O_APPEND|os.O_WRONLY, 0o644)
+	path, _ := GetLogPath()
+	file, err2 := os.OpenFile(path, os.O_APPEND|os.O_WRONLY, 0o644)
 	if err2 != nil {
 		return errors.New("Cannot read the file")
 	}
@@ -58,4 +59,12 @@ func Info(msg string) {
 		color.Red(err.Error())
 	}
 	fmt.Printf("%s %s", blue("[ INFO ]: ->"), msg)
+}
+
+func Warning(msg string) {
+	err := writeLog("WARN", msg)
+	if err != nil {
+		color.Red(err.Error())
+	}
+	fmt.Printf("%s %s", yellow("[ WARN ]: ->"), msg)
 }

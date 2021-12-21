@@ -1,2 +1,2 @@
 fmt:
-	gofumpt -w -l .
+	gofumpt -w -l . && goimports -w -l .

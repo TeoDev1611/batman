@@ -7,10 +7,12 @@ import (
 func main() {
 	log.Config.AppName = "test"
 	log.Config.FileToLog = "asdasd.log"
-	err := log.CreateLog()
+	err := log.Init()
 	if err != nil {
 		panic(err)
 	}
-	println(log.Config.FilePathLog)
-	log.Info("asdasd")
+	path, _ := log.GetLogPath()
+	println(path)
+	log.Info("XD")
+	log.Warning("asdasd")
 }
