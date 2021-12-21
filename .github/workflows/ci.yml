@@ -1,4 +1,4 @@
-name: Moldy Golang CI
+name: Check Build checker
 
 on:
   push:
