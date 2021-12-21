@@ -25,10 +25,14 @@ type customLogMessage struct {
 	Error string
 	// Custom log key to the file fatal level DEFAULT: FATAL
 	Fatal string
+	// Exit code with the fatal level
+	FatalExit bool
+	// Exit code with the error level
+	ErrorExit bool
 }
 
 // The customlog helper for the customLogMessage struct
-var CustomLog = customLogMessage{}
+var LogOpts = customLogMessage{}
 
 var (
 	yellow = color.New(color.FgYellow, color.Underline).SprintFunc()
@@ -39,10 +43,12 @@ var (
 
 // Init the struct values
 func init() {
-	CustomLog.Error = "ERROR"
-	CustomLog.Info = "INFO"
-	CustomLog.Warning = "WARN"
-	CustomLog.Fatal = "FATAL"
+	LogOpts.Error = "ERROR"
+	LogOpts.Info = "INFO"
+	LogOpts.Warning = "WARN"
+	LogOpts.Fatal = "FATAL"
+	LogOpts.ErrorExit = false
+	LogOpts.FatalExit = true
 }
 
 func writeLog(typelog, msg string) error {
@@ -77,18 +83,46 @@ func writeLog(typelog, msg string) error {
 
 // Make a log to the terminal and the file with Info level
 func Info(msg string) {
-	err := writeLog(CustomLog.Info, msg)
+	err := writeLog(LogOpts.Info, msg)
 	if err != nil {
 		color.Red(err.Error())
+		return
 	}
 	fmt.Printf("%s %s \n", blue("[ INFO ]: ->"), msg)
 }
 
 // Make a log to the terminal and the file with Warning level
 func Warning(msg string) {
-	err := writeLog(CustomLog.Warning, msg)
+	err := writeLog(LogOpts.Warning, msg)
 	if err != nil {
 		color.Red(err.Error())
+		return
 	}
 	fmt.Printf("%s %s \n", yellow("[ WARN ]: ->"), msg)
+}
+
+// Make a log to the terminal and the file with Error level
+func Error(msg string) {
+	err := writeLog(LogOpts.Error, msg)
+	if err != nil {
+		color.Red(err.Error())
+		return
+	}
+	fmt.Printf("%s %s \n", red("[ ERROR ]: ->"), msg)
+	if LogOpts.ErrorExit {
+		os.Exit(2)
+	}
+}
+
+// Make a log to the terminal and the file with Fatal level
+func Fatal(msg string) {
+	err := writeLog(LogOpts.Error, msg)
+	if err != nil {
+		color.Red(err.Error())
+		return
+	}
+	fmt.Printf("%s %s \n", pink("[ FATAL ]: ->"), msg)
+	if LogOpts.FatalExit {
+		os.Exit(2)
+	}
 }

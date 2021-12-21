@@ -15,4 +15,7 @@ func main() {
 	println(path)
 	log.Info("XD")
 	log.Warning("asdasd")
+	log.Error("an example error")
+	log.Fatal("an example fatal")
+	print("this will be not printed")
 }
