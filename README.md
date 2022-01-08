@@ -19,9 +19,9 @@ Well this is a simple logger created with some tools and colors :sunglasses:
 
 ![Terminal Usage](./docs/terminal_image.png)
 
-- Json file generator
+- Log file generator
 
-![Json Image](./docs/json_image.png)
+![Log File generator](./docs/log_image.png)
 
 # :keyboard: How install this ?
 
@@ -64,10 +64,10 @@ import (
 )
 
 func init(){
-  log.LogOpts.Error = "CUSTOM_KEY_ERROR" // Custom the key for the json file in the error level DEFAULT: ERROR
-  log.LogOpts.Info = "CUSTOM_KEY_INFO" // Custom the key for the json file in the info level DEFAULT: INFO
-  log.LogOpts.Warning = "CUSTOM_KEY_WARN" // Custom the key for the json file in the warn level DEFAULT: WARN
-  log.LogOpts.Fatal = "CUSTOM_KEY_FATAL" // Custom the key for the json file in the fatal level DEFAULT: FATAL
+  log.LogOpts.Error = "CUSTOM_KEY_ERROR" // Custom the key for the log file in the error level DEFAULT: ERROR
+  log.LogOpts.Info = "CUSTOM_KEY_INFO" // Custom the key for the log file in the info level DEFAULT: INFO
+  log.LogOpts.Warning = "CUSTOM_KEY_WARN" // Custom the key for the log file in the warn level DEFAULT: WARN
+  log.LogOpts.Fatal = "CUSTOM_KEY_FATAL" // Custom the key for the log file in the fatal level DEFAULT: FATAL
 
   log.LogOpts.ErrorExit = true // Exit the program with 2 code in the error logs DEFAULT: false
   log.LogOpts.FatalExit = true // Exit the program with 2 code in the fatal logs DEFAULT: true

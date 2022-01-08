@@ -1,7 +1,6 @@
 package log
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -55,17 +54,16 @@ func writeLog(typelog, msg string) error {
 	if Config.FileToLog == "default" {
 		return errors.New("Fail to get the path you need add the path to log first")
 	}
-	timeLog, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+
+	timeNow := time.Now()
+	timeLog := timeNow.Format("2006-01-02 15:04:05")
+
 	data := logData{
 		TypeOfLog: typelog,
 		Message:   msg,
-		TimeStamp: timeLog.String(),
+		TimeStamp: timeLog,
 	}
-
-	jsondata, err3 := json.Marshal(data)
-	if err3 != nil {
-		return errors.New("Error in parse from struct to json report github")
-	}
+	string := fmt.Sprintf("%s %s %s\n", data.TimeStamp, data.TypeOfLog, data.Message)
 
 	path, _ := GetLogPath()
 	file, err2 := os.OpenFile(path, os.O_APPEND|os.O_WRONLY, 0o644)
@@ -74,7 +72,7 @@ func writeLog(typelog, msg string) error {
 	}
 	defer file.Close()
 
-	if _, err := file.WriteString(string(jsondata)); err != nil {
+	if _, err := file.WriteString(string); err != nil {
 		return errors.New("Cannot write the data to the file")
 	}
 
