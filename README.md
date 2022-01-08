@@ -26,7 +26,7 @@ Well this is a simple logger created with some tools and colors :sunglasses:
 # :keyboard: How install this ?
 
 ```
-go get github.com/TeoDev1611/batman
+go get -u github.com/TeoDev1611/batman/log
 ```
 
 # :ok_hand: Examples
