@@ -7,6 +7,7 @@
   <img src="https://img.shields.io/github/license/teodev1611/batman?style=flat-square">
   <img src="https://img.shields.io/github/stars/teodev1611/batman?style=social">
   <img src="https://img.shields.io/github/go-mod/go-version/teodev1611/batman/main?filename=go.mod">
+  <a href="https://www.buymeacoffee.com/teodev1611" target="_blank"><img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-ffdd00?style=flat-square&logo=buy-me-a-coffee&logoColor=black" alt="Buy Me A Coffee"></a>
 </div>
 
 # :thinking: What is this?
@@ -136,6 +137,14 @@ func init(){
 5. Review your pull request :shipit:
 6. Merge the pull request or request changes
 7. Done! :smiley:
+
+# :moneybag: Support
+
+If you find this project useful, consider supporting its development!
+
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-ffdd00?style=flat-square&logo=buy-me-a-coffee&logoColor=black)](https://www.buymeacoffee.com/teodev1611)
+
+For more information on how to support this project, check out [SUPPORT.md](./docs/SUPPORT.md).
 
 # :mega: Credits
 
