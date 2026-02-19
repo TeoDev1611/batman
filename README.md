@@ -40,7 +40,7 @@ import (
 
 func main() {
 	log.Config.AppName = "YourAppName" // Add the app name for the folder to create the logs
-	log.Config.FileToLog = "filetolog.log" // Add the name for the file to write the logs ( JSON FORMAT )
+	log.Config.FileToLog = "filetolog.log" // Add the name for the file to write the logs
 	err := log.Init() // Init the app
 	if err != nil {
 		panic(err)          // Check the errors
@@ -49,10 +49,14 @@ func main() {
 	log.Warning("an example warning") // Make a warning logger
 	log.Error("an example error") // Make a error logger
 	log.Fatal("an example fatal") // Make a fatal
-	print("this will be not printed") // WHY THIS NOT PRINT ( Make a os exit status 2 for the fatal)
+	log.Debug("an example debug") // Make a debug
   // DISABLE ?? Check the customization opts
 }
 ```
+
+# :rocket: Roadmap for v2
+
+We are planning a major update for v2! Check out our [TODO.md](./TODO.md) for more information. Features like structured JSON logging, log rotation, and async logging are coming soon.
 
 - Customization examples
 

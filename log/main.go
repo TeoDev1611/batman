@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/fatih/color"
@@ -24,6 +25,8 @@ type customLogMessage struct {
 	Error string
 	// Custom log key to the file fatal level DEFAULT: FATAL
 	Fatal string
+	// Custom log key to the file debug level DEFAULT: DEBUG
+	Debug string
 	// Exit code with the fatal level
 	FatalExit bool
 	// Exit code with the error level
@@ -38,7 +41,10 @@ var (
 	red    = color.New(color.FgRed, color.Bold).SprintFunc()
 	blue   = color.New(color.FgBlue).SprintFunc()
 	pink   = color.New(color.FgHiMagenta, color.Bold).SprintFunc()
+	cyan   = color.New(color.FgCyan).SprintFunc()
 )
+
+var mu sync.Mutex
 
 // Init the struct values
 func init() {
@@ -46,6 +52,7 @@ func init() {
 	LogOpts.Info = "INFO"
 	LogOpts.Warning = "WARN"
 	LogOpts.Fatal = "FATAL"
+	LogOpts.Debug = "DEBUG"
 	LogOpts.ErrorExit = false
 	LogOpts.FatalExit = true
 }
@@ -54,6 +61,9 @@ func writeLog(typelog, msg string) error {
 	if Config.FileToLog == "default" {
 		return errors.New("Fail to get the path you need add the path to log first")
 	}
+
+	mu.Lock()
+	defer mu.Unlock()
 
 	timeNow := time.Now()
 	timeLog := timeNow.Format("2006-01-02 15:04:05")
@@ -66,7 +76,8 @@ func writeLog(typelog, msg string) error {
 	string := fmt.Sprintf("%s %s %s\n", data.TimeStamp, data.TypeOfLog, data.Message)
 
 	path, _ := GetLogPath()
-	file, err2 := os.OpenFile(path, os.O_APPEND|os.O_WRONLY, 0o644)
+	// Ensure the file is opened in append mode and created if it doesn't exist
+	file, err2 := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
 	if err2 != nil {
 		return errors.New("Cannot read the file")
 	}
@@ -123,4 +134,14 @@ func Fatal(msg string) {
 	if LogOpts.FatalExit {
 		os.Exit(2)
 	}
+}
+
+// Make a log to the terminal and the file with Debug level
+func Debug(msg string) {
+	err := writeLog(LogOpts.Debug, msg)
+	if err != nil {
+		color.Red(err.Error())
+		return
+	}
+	fmt.Printf("%s %s \n", cyan("[ DEBUG ]: ->"), msg)
 }

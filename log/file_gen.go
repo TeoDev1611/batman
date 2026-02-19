@@ -61,7 +61,7 @@ func Init() error {
 		return errCheck
 	}
 	file := filepath.Join(configpath, Config.FileToLog)
-	fh, err := os.Create(file)
+	fh, err := os.OpenFile(file, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
 	errFileCreation := errors.CheckErrors(err, "Error in create the file of logs")
 	if errFileCreation != nil {
 		return errFileCreation
