@@ -94,6 +94,14 @@ func performWrite(output string) {
 	defer mu.Unlock()
 
 	path, _ := GetLogPath()
+	
+	// Check rotation
+	if fileInfo, err := os.Stat(path); err == nil {
+		if fileInfo.Size()+int64(len(output)) > Config.MaxSize {
+			rotate(path)
+		}
+	}
+
 	file, err2 := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
 	if err2 != nil {
 		return
@@ -101,6 +109,18 @@ func performWrite(output string) {
 	defer file.Close()
 
 	file.WriteString(output)
+}
+
+func rotate(path string) {
+	// Rotate backups
+	for i := Config.MaxBackups - 1; i >= 1; i-- {
+		oldPath := fmt.Sprintf("%s.%d", path, i)
+		newPath := fmt.Sprintf("%s.%d", path, i+1)
+		os.Rename(oldPath, newPath)
+	}
+	
+	// Rename current to .1
+	os.Rename(path, path+".1")
 }
 
 func writeLog(typelog, msg string, fields map[string]interface{}) error {

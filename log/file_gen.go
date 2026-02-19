@@ -22,6 +22,10 @@ type config struct {
 	Async bool
 	// BufferSize for async channel
 	BufferSize int
+	// MaxSize of log file in bytes (v2)
+	MaxSize int64
+	// MaxBackups to keep (v2)
+	MaxBackups int
 }
 
 // Init the struct of config and make public
@@ -35,6 +39,8 @@ func init() {
 	Config.JSONFormat = false
 	Config.Async = false
 	Config.BufferSize = 100
+	Config.MaxSize = 10 * 1024 * 1024 // 10MB default
+	Config.MaxBackups = 3
 }
 
 // Make the private function for init the folders for the app

@@ -3,6 +3,7 @@ package log
 import (
 	"encoding/json"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -107,5 +108,26 @@ func TestAsyncLogging(t *testing.T) {
 
 	if !strings.Contains(string(content), msg) {
 		t.Errorf("Async log not found in file: %s", string(content))
+	}
+}
+
+func TestLogRotation(t *testing.T) {
+	tmpDir := t.TempDir()
+	Config.AppName = "testapp-rotate"
+	Config.FileToLog = "rotate.log"
+	Config.FilePathLog = tmpDir
+	Config.Async = false
+	Config.MaxSize = 50 // 50 bytes is enough for 1 log line
+	Config.MaxBackups = 1
+
+	msg := "A message longer than 50 bytes so it triggers rotation after some writes."
+	Info(msg)
+	Info(msg) // Second write should trigger rotation
+
+	logPath := filepath.Join(tmpDir, "rotate.log")
+	backupPath := logPath + ".1"
+
+	if _, err := os.Stat(backupPath); os.IsNotExist(err) {
+		t.Errorf("Backup file %s was not created during rotation", backupPath)
 	}
 }
