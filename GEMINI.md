@@ -28,9 +28,8 @@ Since this is a Go library, standard Go commands apply:
 - **Log Format:** Files are generated with a space-separated format: `YYYY-MM-DD HH:MM:SS LEVEL MESSAGE`. If `JSONFormat` is enabled, logs are written as JSON objects.
 - **Async Logging:** Use `log.Config.Async = true` and `log.Close()` to flush logs.
 - **Log Rotation:** Configurable via `MaxSize` and `MaxBackups`.
-- **Error Handling:** Use the `errors.CheckErrors` utility when appropriate to wrap errors with custom messages.
-- **Persistent Storage:** Logs are typically stored in the OS-specific user cache directory under the `AppName` specified in `log.Config`.
-- **Roadmap:** See `TODO.md` for v2 features (Structured logging, log rotation, performance).
+- **Examples:** Check the `/examples` folder for `basic` and `advanced` usage.
+- **Documentation:** The `README.md` now contains a complete guide for v2 features.
 
 ## Usage Example
 
@@ -41,17 +40,17 @@ import "github.com/TeoDev1611/batman/log"
 
 func main() {
     log.Config.AppName = "MyApp"
-    log.Config.FileToLog = "app.log"
+    log.Config.FileToLog = "app.json"
     log.Config.JSONFormat = true
     log.Config.Async = true
+    log.Config.MaxSize = 5 * 1024 * 1024 // 5MB
     
     if err := log.Init(); err != nil {
         panic(err)
     }
-    defer log.Close() // Ensure async logs are flushed
+    defer log.Close() 
     
-    log.WithFields(map[string]interface{}{"event": "startup"}).Info("Service started")
-    log.Debug("Debugging info")
-    log.Error("Something went wrong")
+    // Log with fields
+    log.WithFields(map[string]interface{}{"event": "startup", "ver": "2.0"}).Info("Service started")
 }
 ```

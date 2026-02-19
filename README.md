@@ -25,38 +25,87 @@ Well this is a simple logger created with some tools and colors :sunglasses:
 
 # :keyboard: How install this ?
 
-```
+```bash
 go get -u github.com/TeoDev1611/batman/log
 ```
 
+# :rocket: New Features (v2)
+
+`batman` has evolved into a production-ready logger with advanced features.
+
+### 1. Structured Logging (JSON)
+Logs can be generated as structured JSON objects, making them compatible with ELK, Splunk, and other analysis tools.
+
+```go
+log.Config.JSONFormat = true
+```
+
+### 2. Async Logging
+Offload log writes to a background worker to avoid blocking your application. Ideal for high-performance systems.
+
+```go
+log.Config.Async = true
+log.Config.BufferSize = 100 // Optional: defaults to 100
+// IMPORTANT: Always call Close() to flush pending logs
+defer log.Close() 
+```
+
+### 3. Context Support (Fields)
+Add metadata to your logs without cluttering the main message.
+
+```go
+log.WithFields(map[string]interface{}{
+    "user_id": 123,
+    "action": "login",
+}).Info("User authenticated")
+```
+
+### 4. Log Rotation
+Prevent log files from growing infinitely. `batman` will automatically rotate files when they reach a certain size.
+
+```go
+log.Config.MaxSize = 10 * 1024 * 1024 // 10MB (in bytes)
+log.Config.MaxBackups = 3            // Keep 3 old log files
+```
+
 # :ok_hand: Examples
+
+Check the [examples](./examples) folder for more in-depth usage:
+- [Basic usage](./examples/basic/main.go)
+- [Advanced features (Async, JSON, Fields)](./examples/advanced/main.go)
+
+### Basic usage
 
 ```go
 package main
 
 import (
-	"github.com/TeoDev1611/batman/log" // Import the log library
+	"github.com/TeoDev1611/batman/log"
 )
 
 func main() {
-	log.Config.AppName = "YourAppName" // Add the app name for the folder to create the logs
-	log.Config.FileToLog = "filetolog.log" // Add the name for the file to write the logs
-	err := log.Init() // Init the app
+	log.Config.AppName = "YourAppName" 
+	log.Config.FileToLog = "filetolog.log" 
+	err := log.Init() 
 	if err != nil {
-		panic(err)          // Check the errors
+		panic(err)
 	}
-	log.Info("an example info") // Make a info level logger
-	log.Warning("an example warning") // Make a warning logger
-	log.Error("an example error") // Make a error logger
-	log.Fatal("an example fatal") // Make a fatal
-	log.Debug("an example debug") // Make a debug
-  // DISABLE ?? Check the customization opts
+	log.Info("an example info") 
+	log.Warning("an example warning") 
+	log.Error("an example error") 
+	log.Fatal("an example fatal") 
+	log.Debug("an example debug") 
 }
 ```
 
 # :rocket: Roadmap for v2
 
-We are planning a major update for v2! Check out our [TODO.md](./TODO.md) for more information. Features like structured JSON logging, log rotation, and async logging are coming soon.
+We are planning a major update for v2! Check out our [TODO.md](./TODO.md) for more information. 
+- [x] Structured logging (JSON support)
+- [x] Log rotation
+- [x] Async logging
+- [ ] Custom formatters interface
+- [x] Context support (adding fields to logs)
 
 - Customization examples
 
