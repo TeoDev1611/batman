@@ -1,6 +1,7 @@
 package log
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -11,9 +12,14 @@ import (
 )
 
 type logData struct {
-	TypeOfLog string
-	Message   string
-	TimeStamp string
+	Level     string                 `json:"level"`
+	Message   string                 `json:"message"`
+	Timestamp string                 `json:"timestamp"`
+	Fields    map[string]interface{} `json:"fields,omitempty"`
+}
+
+type Logger struct {
+	fields map[string]interface{}
 }
 
 type customLogMessage struct {
@@ -57,7 +63,7 @@ func init() {
 	LogOpts.FatalExit = true
 }
 
-func writeLog(typelog, msg string) error {
+func writeLog(typelog, msg string, fields map[string]interface{}) error {
 	if Config.FileToLog == "default" {
 		return errors.New("Fail to get the path you need add the path to log first")
 	}
@@ -69,11 +75,28 @@ func writeLog(typelog, msg string) error {
 	timeLog := timeNow.Format("2006-01-02 15:04:05")
 
 	data := logData{
-		TypeOfLog: typelog,
+		Level:     typelog,
 		Message:   msg,
-		TimeStamp: timeLog,
+		Timestamp: timeLog,
+		Fields:    fields,
 	}
-	string := fmt.Sprintf("%s %s %s\n", data.TimeStamp, data.TypeOfLog, data.Message)
+
+	var output string
+	if Config.JSONFormat {
+		jsonData, err := json.Marshal(data)
+		if err != nil {
+			return errors.New("Cannot serialize to JSON")
+		}
+		output = string(jsonData) + "\n"
+	} else {
+		// Plain text format
+		output = fmt.Sprintf("%s %s %s", data.Timestamp, data.Level, data.Message)
+		if len(fields) > 0 {
+			fieldsData, _ := json.Marshal(fields)
+			output += fmt.Sprintf(" fields: %s", string(fieldsData))
+		}
+		output += "\n"
+	}
 
 	path, _ := GetLogPath()
 	// Ensure the file is opened in append mode and created if it doesn't exist
@@ -83,16 +106,23 @@ func writeLog(typelog, msg string) error {
 	}
 	defer file.Close()
 
-	if _, err := file.WriteString(string); err != nil {
+	if _, err := file.WriteString(output); err != nil {
 		return errors.New("Cannot write the data to the file")
 	}
 
 	return nil
 }
 
-// Make a log to the terminal and the file with Info level
-func Info(msg string) {
-	err := writeLog(LogOpts.Info, msg)
+// Global logger with fields
+var contextLogger = &Logger{fields: make(map[string]interface{})}
+
+// WithFields returns a new logger with the provided fields
+func WithFields(fields map[string]interface{}) *Logger {
+	return &Logger{fields: fields}
+}
+
+func (l *Logger) Info(msg string) {
+	err := writeLog(LogOpts.Info, msg, l.fields)
 	if err != nil {
 		color.Red(err.Error())
 		return
@@ -100,9 +130,8 @@ func Info(msg string) {
 	fmt.Printf("%s %s \n", blue("[ INFO ]: ->"), msg)
 }
 
-// Make a log to the terminal and the file with Warning level
-func Warning(msg string) {
-	err := writeLog(LogOpts.Warning, msg)
+func (l *Logger) Warning(msg string) {
+	err := writeLog(LogOpts.Warning, msg, l.fields)
 	if err != nil {
 		color.Red(err.Error())
 		return
@@ -110,9 +139,8 @@ func Warning(msg string) {
 	fmt.Printf("%s %s \n", yellow("[ WARN ]: ->"), msg)
 }
 
-// Make a log to the terminal and the file with Error level
-func Error(msg string) {
-	err := writeLog(LogOpts.Error, msg)
+func (l *Logger) Error(msg string) {
+	err := writeLog(LogOpts.Error, msg, l.fields)
 	if err != nil {
 		color.Red(err.Error())
 		return
@@ -123,9 +151,8 @@ func Error(msg string) {
 	}
 }
 
-// Make a log to the terminal and the file with Fatal level
-func Fatal(msg string) {
-	err := writeLog(LogOpts.Fatal, msg)
+func (l *Logger) Fatal(msg string) {
+	err := writeLog(LogOpts.Fatal, msg, l.fields)
 	if err != nil {
 		color.Red(err.Error())
 		return
@@ -136,12 +163,38 @@ func Fatal(msg string) {
 	}
 }
 
-// Make a log to the terminal and the file with Debug level
-func Debug(msg string) {
-	err := writeLog(LogOpts.Debug, msg)
+func (l *Logger) Debug(msg string) {
+	err := writeLog(LogOpts.Debug, msg, l.fields)
 	if err != nil {
 		color.Red(err.Error())
 		return
 	}
 	fmt.Printf("%s %s \n", cyan("[ DEBUG ]: ->"), msg)
+}
+
+// Global level functions (shorthand for global contextLogger)
+
+// Make a log to the terminal and the file with Info level
+func Info(msg string) {
+	contextLogger.Info(msg)
+}
+
+// Make a log to the terminal and the file with Warning level
+func Warning(msg string) {
+	contextLogger.Warning(msg)
+}
+
+// Make a log to the terminal and the file with Error level
+func Error(msg string) {
+	contextLogger.Error(msg)
+}
+
+// Make a log to the terminal and the file with Fatal level
+func Fatal(msg string) {
+	contextLogger.Fatal(msg)
+}
+
+// Make a log to the terminal and the file with Debug level
+func Debug(msg string) {
+	contextLogger.Debug(msg)
 }

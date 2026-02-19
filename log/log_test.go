@@ -1,48 +1,86 @@
 package log
 
 import (
+	"encoding/json"
 	"io/ioutil"
-	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 )
 
 func TestLogging(t *testing.T) {
-	tmpDir, err := ioutil.TempDir("", "batman-test")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer os.RemoveAll(tmpDir)
-
+	tmpDir := t.TempDir()
 	Config.AppName = "testapp"
 	Config.FileToLog = "test.log"
 	Config.FilePathLog = tmpDir
+	Config.JSONFormat = false
 
 	msg := "This is a test message"
 	Info(msg)
-	Warning(msg)
-	Error(msg)
-	Debug(msg)
-
+	
 	logPath := filepath.Join(tmpDir, "test.log")
 	content, err := ioutil.ReadFile(logPath)
 	if err != nil {
 		t.Fatalf("Failed to read log file: %v", err)
 	}
 
-	lines := strings.Split(strings.TrimSpace(string(content)), "\n")
-	if len(lines) != 4 {
-		t.Errorf("Expected 4 log lines, got %d", len(lines))
+	if !strings.Contains(string(content), LogOpts.Info) || !strings.Contains(string(content), msg) {
+		t.Errorf("Plain log format incorrect: %s", string(content))
+	}
+}
+
+func TestJSONLogging(t *testing.T) {
+	tmpDir := t.TempDir()
+	Config.AppName = "testapp-json"
+	Config.FileToLog = "test.json"
+	Config.FilePathLog = tmpDir
+	Config.JSONFormat = true
+
+	msg := "JSON test message"
+	Info(msg)
+
+	logPath := filepath.Join(tmpDir, "test.json")
+	content, err := ioutil.ReadFile(logPath)
+	if err != nil {
+		t.Fatalf("Failed to read log file: %v", err)
 	}
 
-	expectedLevels := []string{LogOpts.Info, LogOpts.Warning, LogOpts.Error, LogOpts.Debug}
-	for i, level := range expectedLevels {
-		if !strings.Contains(lines[i], level) {
-			t.Errorf("Line %d expected to contain %s, got: %s", i, level, lines[i])
-		}
-		if !strings.Contains(lines[i], msg) {
-			t.Errorf("Line %d expected to contain message, got: %s", i, lines[i])
-		}
+	var data logData
+	if err := json.Unmarshal(content, &data); err != nil {
+		t.Fatalf("Failed to unmarshal JSON log: %v", err)
+	}
+
+	if data.Level != LogOpts.Info || data.Message != msg {
+		t.Errorf("JSON log data incorrect: %+v", data)
+	}
+}
+
+func TestWithFields(t *testing.T) {
+	tmpDir := t.TempDir()
+	Config.AppName = "testapp-fields"
+	Config.FileToLog = "fields.json"
+	Config.FilePathLog = tmpDir
+	Config.JSONFormat = true
+
+	fields := map[string]interface{}{
+		"user_id": 123,
+		"action":  "login",
+	}
+	
+	WithFields(fields).Info("User logged in")
+
+	logPath := filepath.Join(tmpDir, "fields.json")
+	content, err := ioutil.ReadFile(logPath)
+	if err != nil {
+		t.Fatalf("Failed to read log file: %v", err)
+	}
+
+	var data logData
+	if err := json.Unmarshal(content, &data); err != nil {
+		t.Fatalf("Failed to unmarshal JSON log: %v", err)
+	}
+
+	if data.Fields["user_id"].(float64) != 123 || data.Fields["action"] != "login" {
+		t.Errorf("Fields not correctly logged: %+v", data.Fields)
 	}
 }

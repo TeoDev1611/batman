@@ -16,6 +16,8 @@ type config struct {
 	FileToLog string
 	// Folder to log dont touch :)
 	FilePathLog string
+	// Support for JSON logs (v2)
+	JSONFormat bool
 }
 
 // Init the struct of config and make public
@@ -26,6 +28,7 @@ func init() {
 	Config.AppName = "batman"
 	Config.FileToLog = "batman.log"
 	Config.FilePathLog = "default"
+	Config.JSONFormat = false
 }
 
 // Make the private function for init the folders for the app
