@@ -84,3 +84,28 @@ func TestWithFields(t *testing.T) {
 		t.Errorf("Fields not correctly logged: %+v", data.Fields)
 	}
 }
+
+func TestAsyncLogging(t *testing.T) {
+	tmpDir := t.TempDir()
+	Config.AppName = "testapp-async"
+	Config.FileToLog = "test-async.log"
+	Config.FilePathLog = tmpDir
+	Config.Async = true
+	Config.BufferSize = 10
+
+	msg := "Async test message"
+	Info(msg)
+	
+	// Must call Close to flush the logs in async mode
+	Close()
+
+	logPath := filepath.Join(tmpDir, "test-async.log")
+	content, err := ioutil.ReadFile(logPath)
+	if err != nil {
+		t.Fatalf("Failed to read log file: %v", err)
+	}
+
+	if !strings.Contains(string(content), msg) {
+		t.Errorf("Async log not found in file: %s", string(content))
+	}
+}

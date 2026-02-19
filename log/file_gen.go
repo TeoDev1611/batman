@@ -18,6 +18,10 @@ type config struct {
 	FilePathLog string
 	// Support for JSON logs (v2)
 	JSONFormat bool
+	// Async logging for better performance (v2)
+	Async bool
+	// BufferSize for async channel
+	BufferSize int
 }
 
 // Init the struct of config and make public
@@ -29,6 +33,8 @@ func init() {
 	Config.FileToLog = "batman.log"
 	Config.FilePathLog = "default"
 	Config.JSONFormat = false
+	Config.Async = false
+	Config.BufferSize = 100
 }
 
 // Make the private function for init the folders for the app

@@ -50,8 +50,6 @@ var (
 	cyan   = color.New(color.FgCyan).SprintFunc()
 )
 
-var mu sync.Mutex
-
 // Init the struct values
 func init() {
 	LogOpts.Error = "ERROR"
@@ -63,13 +61,52 @@ func init() {
 	LogOpts.FatalExit = true
 }
 
+var (
+	mu     sync.Mutex
+	logChan chan string
+	wg     sync.WaitGroup
+	once   sync.Once
+)
+
+func startWorker() {
+	if logChan == nil {
+		logChan = make(chan string, Config.BufferSize)
+	}
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		for output := range logChan {
+			performWrite(output)
+		}
+	}()
+}
+
+// Close flushes and closes the async log channel
+func Close() {
+	if Config.Async && logChan != nil {
+		close(logChan)
+		wg.Wait()
+	}
+}
+
+func performWrite(output string) {
+	mu.Lock()
+	defer mu.Unlock()
+
+	path, _ := GetLogPath()
+	file, err2 := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
+	if err2 != nil {
+		return
+	}
+	defer file.Close()
+
+	file.WriteString(output)
+}
+
 func writeLog(typelog, msg string, fields map[string]interface{}) error {
 	if Config.FileToLog == "default" {
 		return errors.New("Fail to get the path you need add the path to log first")
 	}
-
-	mu.Lock()
-	defer mu.Unlock()
 
 	timeNow := time.Now()
 	timeLog := timeNow.Format("2006-01-02 15:04:05")
@@ -98,18 +135,13 @@ func writeLog(typelog, msg string, fields map[string]interface{}) error {
 		output += "\n"
 	}
 
-	path, _ := GetLogPath()
-	// Ensure the file is opened in append mode and created if it doesn't exist
-	file, err2 := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
-	if err2 != nil {
-		return errors.New("Cannot read the file")
-	}
-	defer file.Close()
-
-	if _, err := file.WriteString(output); err != nil {
-		return errors.New("Cannot write the data to the file")
+	if Config.Async {
+		once.Do(startWorker)
+		logChan <- output
+		return nil
 	}
 
+	performWrite(output)
 	return nil
 }
 
